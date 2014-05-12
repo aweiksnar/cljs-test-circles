@@ -35,7 +35,7 @@
   (.-value (.querySelector js/document "input[name='color']:checked")))
 
 (defn create-svg [parent id width height]
-  (set! (.-innerHTML parent)
+  (set-html parent
      (str "<?xml version=1.0'?>
            <svg id="id" width='"width"' height='"height"' version='1.1'
              xmlns='http://www.w3.org/2000/svg'>
@@ -62,7 +62,7 @@
   [_ _ _ new]
 ;;[key id old new]
   (let [{:keys [x y id]} (last new)]
-    (add-circle x y (js/parseInt (rad-input-val)) id my-svg )))
+    (add-circle x y (js/parseInt (rad-input-val)) id my-svg)))
 
 (add-watch marks :append-latest-mark append-latest-mark)
 
@@ -85,6 +85,5 @@
 
 ;; todo:
 ;; cross browser layer mouse coords function (ff)
-;; use destructuring
 ;; move/select/delete/change-size circles
 ;; get the changes/difference between marks atom changes
