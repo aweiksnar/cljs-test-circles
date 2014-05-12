@@ -29,7 +29,7 @@
 (def rad-input (el-by-id "circle-radius"))
 
 (defn rad-input-val []
-  (.-value rad-input))
+  (js/parseInt (.-value rad-input)))
 
 (defn circle-color []
   (.-value (.querySelector js/document "input[name='color']:checked")))
@@ -62,7 +62,7 @@
   [_ _ _ new]
 ;;[key id old new]
   (let [{:keys [x y id]} (last new)]
-    (add-circle x y (js/parseInt (rad-input-val)) id my-svg)))
+    (add-circle x y (rad-input-val) id my-svg)))
 
 (add-watch marks :append-latest-mark append-latest-mark)
 
