@@ -1,0 +1,32 @@
+<html>
+    <meta charset="UTF-8">
+    <head>
+        <style>
+            #my-svg {
+              height: 400px;
+              width: 600px;
+              background-color: #E5E5E5;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Circles</h1>
+        <div id="sheet"></div>
+
+        Circle Size:
+        <input id="circle-radius" type="range" min="5" max="30" value="10">
+        <span id="curr-circle-size">10</span>px
+
+        <form>
+            Color:
+            <input type="radio" name="color" value="red">Red
+            <input type="radio" name="color" value="green">Green
+            <input type="radio" name="color" value="blue" checked>Blue
+            <input type="radio" name="color" value="yellow">Yellow
+        </form>
+
+        <script src="out/goog/base.js" type="text/javascript"></script>
+        <script src="circles.js" type="text/javascript"></script>
+        <script type="text/javascript">goog.require("circles.core");</script>
+    </body>
+</html>
