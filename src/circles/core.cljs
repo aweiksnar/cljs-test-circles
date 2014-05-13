@@ -2,6 +2,10 @@
 
 (enable-console-print!)
 
+(defn largest-key [map]
+  "largest key in a map with integers for keys ex: {2 :two 1 :one} ;=> 2"
+  (apply max (keys map)))
+
 (defn set-svg-attr [el attr value]
   (.setAttribute el attr value))
 
@@ -45,7 +49,7 @@
 
 (def my-svg (el-by-id "my-svg"))
 
-(def marks (atom []))
+(def marks (atom {}))
 
 (def mark-counter (atom 0))
 
@@ -55,14 +59,16 @@
     (set-svg-attr circle "cx" x)
     (set-svg-attr circle "cy" y)
     (set-svg-attr circle "fill" (circle-color))
-    (set-svg-attr circle "id" id)
+    (set-svg-attr circle "id" (str "mark-"id))
     (append circle container)))
 
 (defn append-latest-mark
   [_ _ _ new]
-;;[key id old new]
-  (let [{:keys [x y id]} (last new)]
-    (add-circle x y (rad-input-val) id my-svg)))
+  ;;[key id old new]
+  (let [new-id (largest-key new)
+        mrk (get @marks new-id)
+        {:keys [x y]} mrk]
+    (add-circle x y (rad-input-val) new-id my-svg)))
 
 (add-watch marks :append-latest-mark append-latest-mark)
 
@@ -74,9 +80,9 @@
   (fn [e]
     (let [el-id (.-id (.-target e))]
       (cond
-        (= el-id "my-svg") (swap! marks conj {:id (str "mark-"(swap! mark-counter inc))
-                                              :x (x-mouse-pos e)
-                                              :y (y-mouse-pos e)})
+        (= el-id "my-svg") (swap! marks assoc (swap! mark-counter inc)
+                                                {:x (x-mouse-pos e)
+                                                 :y (y-mouse-pos e)})
         :else (println "clicked on:" el-id)))))
 
 (println "core.cljs loaded")
