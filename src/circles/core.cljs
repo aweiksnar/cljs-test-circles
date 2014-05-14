@@ -1,4 +1,5 @@
-(ns circles.core)
+(ns circles.core
+  (:require [clojure.string :as cstr]))
 
 (enable-console-print!)
 
@@ -11,6 +12,10 @@
 
 (defn append [el parent]
   (.appendChild parent el))
+
+(defn delete-el [el]
+  (-> (.-parentNode el)
+      (.removeChild el)))
 
 (defn el-by-id [id]
   (.getElementById js/document id))
@@ -29,6 +34,9 @@
 
 (defn y-mouse-pos [e]
   (- (.-pageY e) (.-top (sheet-rect e)) (.-scrollY js/window)))
+
+(defn id->key [id]
+  (js/parseInt (last (cstr/split id #"-"))))
 
 (def rad-input (el-by-id "circle-radius"))
 
@@ -62,15 +70,23 @@
     (set-svg-attr circle "id" (str "mark-"id))
     (append circle container)))
 
-(defn append-latest-mark
-  [_ _ _ new]
+(defn update-marks
+  [_ _ old new]
   ;;[key id old new]
   (let [new-id (largest-key new)
         mrk (get @marks new-id)
+        len-old (count old)
+        len-new (count new)
         {:keys [x y]} mrk]
-    (add-circle x y (rad-input-val) new-id my-svg)))
+    (cond
+      (> len-new len-old)
+         (add-circle x y (rad-input-val) new-id my-svg)
+      (< len-new len-old)
+         (println "put code to remove circle(s) here")
+      :else
+         (println "put code to to handle selection here"))))
 
-(add-watch marks :append-latest-mark append-latest-mark)
+(add-watch marks :update-marks update-marks)
 
 (.addEventListener rad-input "input"
   (fn [e]
@@ -82,8 +98,9 @@
       (cond
         (= el-id "my-svg") (swap! marks assoc (swap! mark-counter inc)
                                                 {:x (x-mouse-pos e)
-                                                 :y (y-mouse-pos e)})
-        :else (println "clicked on:" el-id)))))
+                                                 :y (y-mouse-pos e)
+                                                 :sel false})
+        :else (println "clicked on mark number-" (id->key el-id))))))
 
 (println "core.cljs loaded")
 
