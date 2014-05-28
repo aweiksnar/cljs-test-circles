@@ -38,6 +38,9 @@
 (defn id->key [id]
   (js/parseInt (last (cstr/split id #"-"))))
 
+(defn key->id [key]
+  (str "mark-" key))
+
 (def rad-input (el-by-id "circle-radius"))
 
 (defn rad-input-val []
@@ -70,9 +73,23 @@
     (set-svg-attr circle "id" (str "mark-"id))
     (append circle container)))
 
+(defn select-mark [key]
+  (let [circle (el-by-id (key->id key))]
+    (set-svg-attr circle "fill" "lime")
+    (set-svg-attr circle "stroke" "black")
+    (set-svg-attr circle "stroke-width" "2")))
+
+(defn selected-marks [marks]
+  "key value pairs in a map where value object has a {:sel true} pair"
+  (let [m marks]
+    (select-keys m (for [[k v] m :when (= (v :sel) true)] k))))
+
+(defn highlight-selected [marks]
+  (doseq [[k v] (selected-marks marks)]
+    (select-mark k)))
+
 (defn update-marks
   [_ _ old new]
-  ;;[key id old new]
   (let [new-id (largest-key new)
         mrk (get @marks new-id)
         len-old (count old)
@@ -84,7 +101,7 @@
       (< len-new len-old)
          (println "put code to remove circle(s) here")
       :else
-         (println "put code to to handle selection here"))))
+         (highlight-selected new))))
 
 (add-watch marks :update-marks update-marks)
 
@@ -100,7 +117,7 @@
                                                 {:x (x-mouse-pos e)
                                                  :y (y-mouse-pos e)
                                                  :sel false})
-        :else (println "clicked on mark number-" (id->key el-id))))))
+        :else (swap! marks assoc-in [(id->key el-id) :sel] true)))))
 
 (println "core.cljs loaded")
 
@@ -108,5 +125,5 @@
 
 ;; todo:
 ;; cross browser layer mouse coords function (ff)
-;; move/select/delete/change-size circles
+;; move/delete/change-size circles
 ;; get the changes/difference between marks atom changes
