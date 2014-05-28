@@ -13,6 +13,9 @@
 (defn append [el parent]
   (.appendChild parent el))
 
+(defn find-el [selector]
+  (.querySelector js/document selector))
+
 (defn delete-el [el]
   (-> (.-parentNode el)
       (.removeChild el)))
@@ -43,11 +46,13 @@
 
 (def rad-input (el-by-id "circle-radius"))
 
+(def delete-btn (find-el "button[name='delete-selected']"))
+
 (defn rad-input-val []
   (js/parseInt (.-value rad-input)))
 
 (defn circle-color []
-  (.-value (.querySelector js/document "input[name='color']:checked")))
+  (.-value (find-el "input[name='color']:checked")))
 
 (defn create-svg [parent id width height]
   (set-html parent
@@ -90,6 +95,7 @@
 
 (defn update-marks
   [_ _ old new]
+; [key id old new]
   (let [new-id (largest-key new)
         mrk (get @marks new-id)
         len-old (count old)
@@ -117,7 +123,11 @@
                                                 {:x (x-mouse-pos e)
                                                  :y (y-mouse-pos e)
                                                  :sel false})
-        :else (swap! marks assoc-in [(id->key el-id) :sel] true)))))
+         :else (swap! marks assoc-in [(id->key el-id) :sel] true)))))
+
+(.addEventListener delete-btn "click"
+  (fn [e]
+    (println "Remove these items from marks atom" (keys (selected-marks @marks)))))
 
 (println "core.cljs loaded")
 
