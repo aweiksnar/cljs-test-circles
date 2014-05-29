@@ -1,5 +1,6 @@
 (ns circles.core
-  (:require [clojure.string :as cstr]))
+  (:require [clojure.string :as cstr :refer [split]]
+            [clojure.data :as data :refer [diff]]))
 
 (enable-console-print!)
 
@@ -39,7 +40,7 @@
   (- (.-pageY e) (.-top (sheet-rect e)) (.-scrollY js/window)))
 
 (defn id->key [id]
-  (js/parseInt (last (cstr/split id #"-"))))
+  (js/parseInt (last (split id #"-"))))
 
 (defn key->id [key]
   (str "mark-" key))
@@ -93,6 +94,14 @@
   (doseq [[k v] (selected-marks marks)]
     (select-mark k)))
 
+(defn delete-selected [marks list-to-del]
+  (doseq [n list-to-del]
+    (swap! marks dissoc n)))
+
+(defn delete-first-diff [old new]
+  "delete first different item between two marks atoms - this is ugly"
+  (delete-el (el-by-id (key->id (first (keys (nth (diff old new) 0)))))))
+
 (defn update-marks
   [_ _ old new]
 ; [key id old new]
@@ -105,7 +114,7 @@
       (> len-new len-old)
          (add-circle x y (rad-input-val) new-id my-svg)
       (< len-new len-old)
-         (println "put code to remove circle(s) here")
+         (delete-first-diff old new)
       :else
          (highlight-selected new))))
 
@@ -113,7 +122,8 @@
 
 (.addEventListener rad-input "input"
   (fn [e]
-    (set-html (el-by-id "curr-circle-size") (rad-input-val))))
+    (set-html (el-by-id "curr-circle-size")
+       (rad-input-val))))
 
 (.addEventListener my-svg "mousedown"
   (fn [e]
@@ -127,13 +137,8 @@
 
 (.addEventListener delete-btn "click"
   (fn [e]
-    (println "Remove these items from marks atom" (keys (selected-marks @marks)))))
+    (delete-selected marks (keys (selected-marks @marks)))))
 
 (println "core.cljs loaded")
 
 (set! (.-marks js/window) @marks)
-
-;; todo:
-;; cross browser layer mouse coords function (ff)
-;; move/delete/change-size circles
-;; get the changes/difference between marks atom changes
